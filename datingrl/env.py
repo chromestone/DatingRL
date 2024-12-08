@@ -39,7 +39,7 @@ class RealScoreEnv(gym.Env):
         observation = np.array([0.0, self.candidates[self.candidate_idx]], dtype=np.float32)
         info = {}
 
-        return np.float32(observation), info
+        return observation, info
 
     def step(self, action: int):
 
@@ -70,4 +70,4 @@ class RealScoreEnv(gym.Env):
         truncated = False
         info = {}
 
-        return np.float32(observation), np.float32(reward), terminated, truncated, info
+        return observation, float(reward), terminated, truncated, info
