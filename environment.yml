@@ -1,0 +1,6 @@
+name: datingrl
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+    - stable-baselines3==2.4.0
