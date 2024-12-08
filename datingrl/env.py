@@ -57,7 +57,7 @@ class RealScoreEnv(gym.Env):
             else:
 
                 observation = np.array([1.0, np.nan], dtype=np.float32)
-                reward = -1.0
+                reward = -50.0
                 terminated = True
 
         else:
