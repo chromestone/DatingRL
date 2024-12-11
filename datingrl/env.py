@@ -2,7 +2,7 @@
 TODO
 """
 
-from typing import Optional
+from typing import Any, Optional
 
 import gymnasium as gym
 import numpy as np
@@ -12,12 +12,12 @@ class RealScoreEnv(gym.Env):
     This environment only outputs the index with the real score as the observation.
     """
 
-    def __init__(self, n: int = 1000):
+    def __init__(self, env_config: dict[str, Any]):
         """
         TODO
         """
 
-        self.n = n
+        self.n = env_config.get('n', 1000)
 
         self.observation_space = gym.spaces.Box(
             low=  np.array([0.0, -np.inf], dtype=np.float32),
@@ -57,7 +57,7 @@ class RealScoreEnv(gym.Env):
             else:
 
                 observation = np.array([0.0, 0.0], dtype=np.float32)
-                reward = -50.0
+                reward = -1.0
                 terminated = True
 
         else:

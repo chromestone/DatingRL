@@ -5,16 +5,26 @@ train.py
 TODO
 """
 
-from stable_baselines3 import DQN
+from pprint import pprint
+
+import ray
+from ray.rllib.algorithms import ppo
 
 from datingrl.env import RealScoreEnv
 
-env = RealScoreEnv()
+ray.init()
 
-model = DQN("MlpPolicy", env, verbose=1)
+config = {
+	'env_config': {}
+}
 
-model.learn(total_timesteps=100_000, log_interval=1000)
+algo = ppo.PPO(env=RealScoreEnv, config=config)
 
-model.save('realscore_dqn_100k')
+for i in range(1):
 
-env.close()
+	result = algo.train()
+	result.pop("config")
+	pprint(result)
+
+checkpoint_dir = algo.save_to_path()
+print(f"Checkpoint saved in directory {checkpoint_dir}")
