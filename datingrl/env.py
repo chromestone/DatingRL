@@ -36,7 +36,7 @@ class RealScoreEnv(gym.Env):
 
         self.candidate_idx = 0
 
-        observation = np.array([0.0, self.candidates[self.candidate_idx]], dtype=np.float32)
+        observation = np.array([1.0, self.candidates[self.candidate_idx]], dtype=np.float32)
         info = {}
 
         return observation, info
@@ -49,20 +49,20 @@ class RealScoreEnv(gym.Env):
 
             if self.candidate_idx < self.n:
 
-                observation = np.array([self.candidate_idx / self.n, self.candidates[self.candidate_idx]], dtype=np.float32)
+                observation = np.array([(self.n - self.candidate_idx) / self.n, self.candidates[self.candidate_idx]], dtype=np.float32)
                 reward = 0.0
                 terminated = False
 
             # we have rejected all candidates and will forever be single :(
             else:
 
-                observation = np.array([1.0, np.nan], dtype=np.float32)
-                reward = -90.0
+                observation = np.array([0.0, 0.0], dtype=np.float32)
+                reward = -50.0
                 terminated = True
 
         else:
 
-            observation = np.array([1.0, np.nan], dtype=np.float32)
+            observation = np.array([0.0, 0.0], dtype=np.float32)
             # +1 because we are 0 indexed and we give some > 0 reward for any candidate (even the worst)
             reward = self.ranks[self.candidate_idx] + 1
             terminated = True
