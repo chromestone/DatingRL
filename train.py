@@ -14,7 +14,7 @@ env = RealScoreEnv()
 print(env.action_space)
 
 model = PPO("MlpPolicy", env, verbose=1)
-model.learn(total_timesteps=10_000)
+model.learn(total_timesteps=100_000)
 
 model.save('realscoreenv_ppo_mlp')
 

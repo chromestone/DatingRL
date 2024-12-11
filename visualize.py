@@ -27,9 +27,11 @@ for i in range(100):
 
         score = j
 
-        action, _ = model.predict(np.array([idx, score], dtype=np.float32), deterministic=True)
+        obs = np.array([idx, score], dtype=np.float32)
+        action, _ = model.predict(obs, deterministic=True)
 
-        img_arr[i * 4 : (i + 1) * 4][j * 4 : (j + 1) * 4] = np.uint8(action * 255)
+        img_arr[i * 4 : (i + 1) * 4, j * 4 : (j + 1) * 4] = action * 255
 
-data = im.fromarray(img_arr)
-data.save('test.png')
+print(np.unique(img_arr, return_counts=True))
+data = im.fromarray(img_arr, mode='L')
+data.save('test.jpg')
