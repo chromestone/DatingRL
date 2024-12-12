@@ -5,8 +5,6 @@ train.py
 TODO
 """
 
-from pprint import pprint
-
 import ray
 from ray.rllib.algorithms import ppo
 
@@ -20,11 +18,10 @@ config = {
 
 algo = ppo.PPO(env=RealScoreEnv, config=config)
 
-for i in range(1):
+for i in range(10):
 
-	result = algo.train()
-	result.pop("config")
-	pprint(result)
+	print(i)
+	algo.train()
 
 checkpoint_dir = algo.save_to_path()
 print(f"Checkpoint saved in directory {checkpoint_dir}")

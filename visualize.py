@@ -1,22 +1,21 @@
 #!/usr/bin/env python3
 
 """
-train.py
+visualize.py
 TODO
 """
 
+from pathlib import Path
+
 import numpy as np
 from PIL import Image as im
-from stable_baselines3 import DQN
-from datingrl.env import RealScoreEnv
 
-env = RealScoreEnv()
+from ray.rllib.core.rl_module import RLModule
 
-env.reset(0)
+import torch
 
-model = DQN("MlpPolicy", env, verbose=1)
-
-model.load('realscore_dqn_100k.zip')
+# Create only the neural network (RLModule) from our checkpoint.
+rl_module = RLModule.from_checkpoint((Path('checkpoints') / "real_score_10").resolve().as_uri())["default_policy"]
 
 img_arr = np.empty((100, 100), dtype=np.uint8)
 
@@ -28,8 +27,20 @@ for i in range(100):
 
         score = j
 
-        obs = np.array([idx, score], dtype=np.float32)
-        action, _ = model.predict(obs, deterministic=True)
+        obs = np.array([[idx, score]], dtype=np.float32)
+
+        # Compute the next action from a batch (B=1) of observations.
+        torch_obs_batch = torch.from_numpy(obs)
+
+        action_logits = rl_module.forward_inference({"obs": torch_obs_batch})["action_dist_inputs"]
+
+        # The default RLModule used here produces action logits (from which
+        # we'll have to sample an action or use the max-likelihood one).
+        action = torch.argmax(action_logits[0]).numpy()
+
+        print(action)
+
+        # action, _ = model.predict(obs, deterministic=True)
         #action = 0
         #for _ in range(10):
 
