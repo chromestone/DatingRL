@@ -8,13 +8,30 @@ TODO
 from pathlib import Path
 
 import numpy as np
-from PIL import Image as im
 
-from ray.rllib.algorithms.algorithm import Algorithm
+from PIL import Image
 
-algo = Algorithm.from_checkpoint((Path('checkpoints') / 'real_score_10').resolve().as_uri())
-l = algo.learner_group._learner._module
-p = algo.get_policy()
+from ray.rllib.core.rl_module import RLModule
+
+import torch
+
+# Create only the neural network (RLModule) from our checkpoint.
+torch_rl_module = RLModule.from_checkpoint(
+    (Path('checkpoints') / 'real_score_10' / 'learner_group' / 'learner' / 'rl_module').resolve().as_uri()
+)["default_policy"]
+
+def compute_single_action(obs: list[float]):
+
+	# Compute the next action from a batch (B=1) of observations.
+    torch_obs_batch = torch.from_numpy(np.array([obs], dtype=np.float32))
+
+    action_logits = torch_rl_module.forward_inference({
+    	'obs': torch_obs_batch
+    })['action_dist_inputs']
+
+    # The default RLModule used here produces action logits (from which
+    # we'll have to sample an action or use the max-likelihood one).
+    return torch.argmax(action_logits[0]).numpy()
 
 img_arr = np.empty((100, 100), dtype=np.uint8)
 
@@ -26,11 +43,13 @@ for i in range(100):
 
 		zscore = (j - 50) / 15
 
-		obs = np.array([[idx, zscore]], dtype=np.float32)
+		obs = [idx, zscore]
 
-		action = p.compute_single_action(obs)
+		action = compute_single_action(obs)
 
-		print(action)
+		assert action in (0, 1)
+
+		# print(action)
 
 		# action, _ = model.predict(obs, deterministic=True)
 		#action = 0
@@ -45,5 +64,5 @@ for i in range(100):
 		img_arr[i, j] = np.uint8(action * 255)
 
 print(np.unique(img_arr, return_counts=True))
-data = im.fromarray(img_arr, mode='L')
+data = Image.fromarray(img_arr, mode='L')
 data.save('visual3.png')
