@@ -8,7 +8,7 @@ INVERSE_E = 1 / math.e
 REJECT = 0
 COMMIT = 1
 
-class OptimalModel:
+def get_action_by_rank(n, candidates_remaining, running_rank):
 	"""
 	According to Wikipedia:
 	The optimal stopping rule prescribes always rejecting the first
@@ -18,9 +18,29 @@ class OptimalModel:
 	if this never occurs).
 	"""
 
-	def __init__(self, real_scores=True):
+	candidates_seen = 1 - candidates_remaining
 
-		self.real_scores = real_scores
+	if candidates_seen > INVERSE_E:
+
+		if running_rank > (n - 1) / n or candidates_seen >= (n - 1) / n:
+
+			return COMMIT
+
+		else:
+
+			return REJECT
+
+	else:
+
+		return REJECT
+
+class OptimalModel:
+	"""
+	TODO
+	"""
+
+	def __init__(self):
+
 		self.best_obs = None
 
 	def get_action(self, obs) -> int:
@@ -29,39 +49,20 @@ class OptimalModel:
 		candidates_seen = 1 - candidates_remaining
 		score = obs[1]
 
-		if real_scores:
+		if candidates_seen > INVERSE_E:
 
-			if candidates_seen > INVERSE_E:
+			if score >= self.best_obs or candidates_remaining <= 1 / 1000:
 
-				if score >= self.best_obs or candidates_remaining <= 1 / 1000:
-
-					return COMMIT
-
-				else:
-
-					return REJECT 
+				return COMMIT
 
 			else:
 
-				if self.best_obs is None or score > self.best_obs:
+				return REJECT 
 
-					self.best_obs = score
-
-				return REJECT
-
-		# caller keeps track of rank. this is the easiest case to handle
 		else:
 
-			if candidates_seen > INVERSE_E:
+			if self.best_obs is None or score > self.best_obs:
 
-				if score == 1 or candidates_remaining <= 1 / 1000:
+				self.best_obs = score
 
-					return COMMIT
-
-				else:
-
-					return REJECT
-
-			else:
-
-				return REJECT
+			return REJECT
