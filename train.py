@@ -14,6 +14,8 @@ from pathlib import Path
 import ray
 from ray.rllib.algorithms.ppo import PPOConfig
 
+from tqdm import tqdm
+
 from datingrl.env import RealScoreEnv
 
 config = (
@@ -28,7 +30,11 @@ config = (
 
 algo = config.build()
 
-algo.train()
+for i in tqdm(range(1, 41)):
 
-checkpoint_dir = algo.save_to_path((Path('checkpoints') / 'real_score_10').resolve().as_uri())
-print(f"Checkpoint saved in directory {checkpoint_dir}")
+	algo.train()
+
+	if i % 10 == 0:
+
+		checkpoint_dir = algo.save_to_path((Path('checkpoints') / f'real_score_{i}').resolve().as_uri())
+		print(f"Checkpoint saved in directory {checkpoint_dir}")

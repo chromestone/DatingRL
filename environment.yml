@@ -75,6 +75,7 @@ dependencies:
       - tensorboardx==2.6.2.2
       - tifffile==2024.9.20
       - torch==2.5.1
+      - tqdm==4.67.1
       - typer==0.15.1
       - typing-extensions==4.12.2
       - tzdata==2024.2

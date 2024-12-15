@@ -17,52 +17,51 @@ import torch
 
 # Create only the neural network (RLModule) from our checkpoint.
 torch_rl_module = RLModule.from_checkpoint(
-    (Path('checkpoints') / 'real_score_10' / 'learner_group' / 'learner' / 'rl_module').resolve().as_uri()
+    (Path('checkpoints') / 'real_score_30' / 'learner_group' / 'learner' / 'rl_module').resolve().as_uri()
 )["default_policy"]
 
-def compute_single_action(obs: list[float]):
+def compute_actions(obs: np.ndarray[np.float32]) -> np.ndarray[np.int64]:
+	"""
+	Compute actions from a batch of observations.
 
-	# Compute the next action from a batch (B=1) of observations.
-    torch_obs_batch = torch.from_numpy(np.array([obs], dtype=np.float32))
+	Args:
+		obs: A numpy array of shape (batch, *observation_shape).
 
-    action_logits = torch_rl_module.forward_inference({
-    	'obs': torch_obs_batch
-    })['action_dist_inputs']
+	Returns:
+		Numpy array of shape (batch,) containing predicted actions.
+	"""
 
-    # The default RLModule used here produces action logits (from which
-    # we'll have to sample an action or use the max-likelihood one).
-    return torch.argmax(action_logits[0]).numpy()
+	# Compute the next action from a batch of observations.
+	torch_obs_batch = torch.from_numpy(obs)
 
-img_arr = np.empty((100, 100), dtype=np.uint8)
+	action_logits = torch_rl_module.forward_inference({
+		'obs': torch_obs_batch
+	})['action_dist_inputs']
 
-for i in range(100):
+	# The default RLModule used here produces action logits (from which
+	# we'll have to sample an action or use the max-likelihood one).
+	return torch.argmax(action_logits, dim=1).numpy()
 
-	idx = (100 - i) / 100
+# Create the 100x100x2 array
+rows, cols = 100, 100
+obs = np.empty((rows, cols, 2), dtype=np.float32)
 
-	for j in range(100):
+# Compute idx for all rows
+idx = (100 - np.arange(rows)) / 100
 
-		zscore = (j - 50) / 15
+# Compute zscore for all columns
+zscore = (np.arange(cols) - 50) / 15
 
-		obs = [idx, zscore]
+# Use broadcasting to combine idx and zscore into obs
+obs[:, :, 0] = idx[:, np.newaxis]
+obs[:, :, 1] = zscore[np.newaxis, :]
 
-		action = compute_single_action(obs)
+actions = compute_actions(obs.reshape((rows * cols, 2))).reshape(rows, cols)
+assert np.all((actions == 0) | (actions == 1))
 
-		assert action in (0, 1)
-
-		# print(action)
-
-		# action, _ = model.predict(obs, deterministic=True)
-		#action = 0
-		#for _ in range(10):
-
-		#    a, _ = model.predict(obs, deterministic=True)
-		#    action += a
-
-		#action = np.round(action / 10)
-
-		# img_arr[i * 4 : (i + 1) * 4, j * 4 : (j + 1) * 4] = action * 255
-		img_arr[i, j] = np.uint8(action * 255)
+img_arr = actions * 255
 
 print(np.unique(img_arr, return_counts=True))
-data = Image.fromarray(img_arr, mode='L')
-data.save('visual3.png')
+
+data = Image.fromarray(np.uint8(img_arr), mode='L')
+data.save('visual.png')
