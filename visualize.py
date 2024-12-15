@@ -12,7 +12,8 @@ from PIL import Image as im
 
 from ray.rllib.algorithms.algorithm import Algorithm
 
-algo = Algorithm.from_checkpoint((Path('checkpoints') / "real_score_10").resolve().as_uri())
+algo = Algorithm.from_checkpoint((Path('checkpoints') / 'real_score_10').resolve().as_uri())
+l = algo.learner_group._learner._module
 p = algo.get_policy()
 
 img_arr = np.empty((100, 100), dtype=np.uint8)

@@ -30,5 +30,5 @@ algo = config.build()
 
 algo.train()
 
-checkpoint_dir = algo.save_to_path((Path('checkpoints') / "real_score_10").resolve().as_uri())
+checkpoint_dir = algo.save_to_path((Path('checkpoints') / 'real_score_10').resolve().as_uri())
 print(f"Checkpoint saved in directory {checkpoint_dir}")
