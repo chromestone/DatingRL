@@ -27,7 +27,7 @@ Thinking through this problem iteratively:
 * For the secretary problem, the optimal strategy follows this structure where you first have to learn "what's out there" and then start looking for the best you've seen so far.
 * I hypothesize that, even when the assumptions are slightly different from the classical secretary problem, in general, for scenarios where you cannot aggregate all choices and then decide, the optimal strategy will also follow this pattern.
 
-As it turns out if you do the math, the optimal strategy for the secretary problem is to unconditionally reject n/e (where e is Euler's constant) gas stations and then pick the next cheapest gas station. (If you run out of gas or candidates then you just have to go with the last one.)
+As it turns out, if you do the math, the optimal strategy for the secretary problem is to unconditionally reject n/e (where e is Euler's constant) gas stations and then pick the next cheapest gas station. (If you run out of gas or candidates then you just have to go with the last one.)
 
 This strategy will find you the cheapeast gas station with probability 1/e. In other words, 37% of the times you will get the cheapest gas.
 
@@ -36,7 +36,8 @@ Veritasium has a great [YouTube video on this](https://youtu.be/d6iQrh2TK98?si=n
 ## How will RL fix my dating life?
 
 You might now be asking:  
-**Wait!!? What does finding the cheapeast gas station have anything to do with my dating life?????**
+**Wait!!?**  
+**What does finding the cheapeast gas station have anything to do with my dating life?????**
 
 Imagine you have the patience to date 1000 people or be available for 10 years. Assuming that the number of candidates is known and that rejecting anyone is final, then the secretary problem tells you to reject the first 37% of candidates and pick the next best candidate that comes along. (This also happens to work for time but I think the proof is technically different.)
 
