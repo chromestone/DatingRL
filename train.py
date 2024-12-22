@@ -16,7 +16,7 @@ from ray.rllib.algorithms.ppo import PPOConfig
 
 from tqdm import tqdm
 
-from datingrl.env import RealScoreEnv
+from datingrl.envs import RealScoreEnv
 
 config = (
 	PPOConfig()

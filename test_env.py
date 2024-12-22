@@ -8,7 +8,7 @@ from argparse import ArgumentParser
 
 import numpy as np
 
-from datingrl.env import STR2ENV
+from datingrl.envs import STR2ENV
 
 parser = ArgumentParser(description='Output some states from an environment')
 
