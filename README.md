@@ -3,12 +3,21 @@ Reinforcement learning solves the dating problem?
 
 ## Motivation
 
-> What would you do if faced with "a choice that is **immediate** and **final**?
+> What would you do if faced with "a choice that is **immediate** and **final**"?
 
-Imagine you are driving down a straight road and need to fill up on gas soon. Each gas station has some posted price (we'll assume signages are honest) and you, as a rational person, would like to buy the cheapest gas. What would you do?
+**Road Trip!!!**
 
-This is the secretary problem in a nutshell.  
-https://en.wikipedia.org/wiki/Secretary_problem
+Imagine you are driving down a straight road and need to fill up on gas soon. Each gas station has some posted price (we'll assume signages are honest) and you, as a rational person, would like to buy the cheapest gas. What would you do to find the lowest price?
+
+This is the secretary problem in a nutshell. For further reading see [Wikipedia](https://en.wikipedia.org/wiki/Secretary_problem).
+
+Although this example is a low risk scenario where you might lose only a few bucks following a nonoptimal strategy, we face numerous choices throughout our lives whose effects can be profound and long lasting. Just to list a few, this problem crops up when you're finding a job, buying a house, and even choosing a life long partner. Depending on your choice, you could live happily ever after or not at all😱.
+
+## Background
+
+> This repository investigates how violating the secretary problem's assumptions and modeling these kinds of "best choice problems" more realistically affects the optimal solution.
+
+Fear not? An optimal solution exists!
 
 Thinking through this problem iteratively:
 
@@ -36,5 +45,10 @@ Actually that's a lie, there's one big thing the secretary problem assumes and o
 
 Ok yes I made up that quote. There's nothing in the secretary problem that encodes the real world situation where a candidate turns down a job offer (when you are the interviewer) or your date rejects you!
 
-This motivation section is getting long. If you couldn't guess by now that's basically why I made this project.  
+It's a little disheartening that, at best, you can only pick the best choice 37% of the times and that's with a whole list of assumptions.
+
+There may be a silver lining; it's not immediately obvious to me what the chances of picking the _top k_ is. So maybe you didn't land that dream job posting you applied to. However, there's often a set of similar jobs that are close enough.
+
+This background section is getting long. If you couldn't guess by now, these assumptions motivated me to make this project.
+
 **This repository investigates how violating the secretary problem's assumptions and modeling these kinds of "best choice problems" more realistically affects the optimal solution.**
