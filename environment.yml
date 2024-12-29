@@ -75,6 +75,7 @@ dependencies:
       - rpds-py==0.22.3
       - scikit-image==0.24.0
       - scipy==1.14.1
+      - seaborn==0.13.2
       - shellingham==1.5.4
       - six==1.17.0
       - sympy==1.13.1
