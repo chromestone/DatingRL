@@ -9,6 +9,7 @@ Usage:
 TODO
 """
 
+from argparse import ArgumentParser
 from pathlib import Path
 
 import ray
@@ -16,7 +17,15 @@ from ray.rllib.algorithms.ppo import PPOConfig
 
 from tqdm import tqdm
 
-from datingrl.envs import RealScoreEnv
+from datingrl.envs import STR2ENV
+
+parser = ArgumentParser(description='TODO')
+
+parser.add_argument('env', choices=STR2ENV.keys(), help='Name of an environment in datingrl.env')
+
+args = parser.parse_args()
+
+env_class = STR2ENV[args.env]
 
 config = (
 	PPOConfig()
@@ -24,7 +33,7 @@ config = (
 		enable_rl_module_and_learner=True,
 		enable_env_runner_and_connector_v2=True,
 	)
-	.environment(RealScoreEnv, env_config={})
+	.environment(env_class, env_config={})
 	.env_runners(num_env_runners=1)
 )
 
@@ -36,5 +45,5 @@ for i in tqdm(range(1, 41)):
 
 	if i % 10 == 0:
 
-		checkpoint_dir = algo.save_to_path((Path('checkpoints') / f'real_score_{i}').resolve().as_uri())
+		checkpoint_dir = algo.save_to_path((Path('checkpoints') / f'{args.env}_{i}').resolve().as_uri())
 		print(f"Checkpoint saved in directory {checkpoint_dir}")
