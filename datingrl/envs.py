@@ -9,6 +9,8 @@ from typing import Any, Optional
 import gymnasium as gym
 import numpy as np
 
+from .constants import REJECT, COMMIT
+
 class RealScoreEnv(gym.Env):
 	"""
 	This environment only outputs the index with the z-score as the observation.
@@ -157,9 +159,9 @@ class RunningRankEnv(gym.Env):
 
 			raise RuntimeError('step called on terminated environment')
 
-		if action not in (0, 1):
+		if action not in (REJECT, COMMIT):
 
-			raise ValueError('action must be 0 or 1')
+			raise ValueError(f'action must be {REJECT} or {COMMIT}')
 
 		if action == 0:
 
@@ -181,8 +183,10 @@ class RunningRankEnv(gym.Env):
 		else:
 
 			observation = np.array([0.0, self.running_ranks[self.candidate_idx]], dtype=np.float32)
-			# +1 because we are 0 indexed and we give some > 0 reward for any candidate (even the worst)
-			reward = self.ranks[self.candidate_idx] + 1
+			# reward is inverse to the "number of candidates better than this candidate"
+			# when there are no candidates that are better, the reward is maximal
+			# 0.1 is added to make 10 rather than infinity the max reward
+			reward = 1 / (self.n - (self.ranks[self.candidate_idx] + 1) + 0.01)
 			terminated = True
 
 		self.terminated = terminated

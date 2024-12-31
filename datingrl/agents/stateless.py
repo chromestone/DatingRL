@@ -122,7 +122,6 @@ class DRLAgent:
 		    An array of actions of shape (batch, ) and probabilities of shape (batch, )
 		"""
 
-		print(observations.dtype)
 		# Compute the next action from a batch of observations.
 		torch_obs_batch = torch.from_numpy(observations)
 

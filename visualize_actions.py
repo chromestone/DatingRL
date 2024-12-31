@@ -101,8 +101,6 @@ if env_type == 'running_rank':
 
 		actions, probs = agent.compute_actions(np.column_stack((candidates_remaining, running_rank)))
 
-		print(actions.shape, probs.shape if probs is not None else '')
-
 		actions_matrix[: (col + 1), col] = actions
 
 		if probs is None:
