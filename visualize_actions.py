@@ -4,7 +4,9 @@ visualize_actions.py
 This script visualizes actions over the observation space.
 
 Usage:
-TODO
+python3 visualize_actions.py -a optimal
+python3 visualize_actions.py -a ppo -c checkpoints/ppo_running_rank_10
+python3 visualize_actions.py -a dqn -c checkpoints/dqn_running_rank_180
 """
 
 from argparse import ArgumentParser
@@ -40,7 +42,7 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-def create_visual(matrix, agent_name):
+def create_visual(matrix: np.ndarray[np.float32], agent_name: str):
 
 	mask = np.tril(np.ones_like(matrix, dtype=bool), k=-1)
 	ax = sns.heatmap(matrix, vmin=0, vmax=1, cmap="viridis", cbar=True, mask=mask)
@@ -56,7 +58,7 @@ def create_visual(matrix, agent_name):
 
 	plt.xticks(rotation=0)
 
-def visualize_actions(matrix, agent_name):
+def visualize_actions(matrix: np.ndarray[np.float32], agent_name: str):
 
 	create_visual(matrix, agent_name)
 
@@ -70,7 +72,7 @@ def visualize_actions(matrix, agent_name):
 
 	plt.close()
 
-def visualize_probs(matrix, agent_name):
+def visualize_probs(matrix: np.ndarray[np.float32], agent_name: str):
 
 	create_visual(matrix, agent_name)
 

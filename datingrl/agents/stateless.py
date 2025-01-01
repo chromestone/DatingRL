@@ -19,6 +19,8 @@ import torch
 
 from ..constants import REJECT, COMMIT
 
+ACTIONS_PROBS_TUPLE_TYPE = tuple[np.ndarray[np.float32], Optional[np.ndarray[np.float32]]]
+
 class OptimalAgent:
 	"""
 	An agent that takes actions according to the optimal policy under classical secretary problem
@@ -50,7 +52,7 @@ class OptimalAgent:
 
 		self.n = n
 
-	def compute_actions(self, observations: np.ndarray) -> tuple[np.ndarray, Optional[np.ndarray]]:
+	def compute_actions(self, observations: np.ndarray[np.float32]) -> ACTIONS_PROBS_TUPLE_TYPE:
 		"""
 		Compute actions for a batch of observations.
 		See the class documentation above for expected values in the observations.
@@ -110,7 +112,7 @@ class PPOAgent:
 			(Path(checkpoint_path) / 'learner_group' / 'learner' / 'rl_module').resolve().as_uri()
 		)["default_policy"]
 
-	def compute_actions(self, observations: np.ndarray) -> tuple[np.ndarray, Optional[np.ndarray]]:
+	def compute_actions(self, observations: np.ndarray[np.float32]) -> ACTIONS_PROBS_TUPLE_TYPE:
 		"""
 		Compute actions for a batch of observations.
 		See the class documentation above for expected values in the observations.
@@ -156,7 +158,7 @@ class DQNAgent:
 			(Path(checkpoint_path) / 'learner_group' / 'learner' / 'rl_module').resolve().as_uri()
 		)["default_policy"]
 
-	def compute_actions(self, observations: np.ndarray) -> tuple[np.ndarray, Optional[np.ndarray]]:
+	def compute_actions(self, observations: np.ndarray[np.float32]) -> ACTIONS_PROBS_TUPLE_TYPE:
 		"""
 		Compute actions for a batch of observations.
 		See the class documentation above for expected values in the observations.

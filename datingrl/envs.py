@@ -56,11 +56,11 @@ class RealScoreEnv(gym.Env):
 
 			raise RuntimeError('step called on terminated environment')
 
-		if action not in (0, 1):
+		if action not in (REJECT, COMMIT):
 
-			raise ValueError('action must be 0 or 1')
+			raise ValueError(f'action must be {REJECT} or {COMMIT}')
 
-		if action == 0:
+		if action == REJECT:
 
 			if self.candidate_idx < self.n - 1:
 
@@ -119,13 +119,6 @@ class RunningRankEnv(gym.Env):
 		super().reset(seed=seed)
 
 		self.scores = self.np_random.standard_normal(self.n, dtype=np.float32)
-		#self.scores = np.ones((self.n, ))
-		#self.scores[:self.n//2] = 0
-		#self.np_random.shuffle(self.scores)
-		#self.scores = np.zeros((self.n, ))
-		#self.scores[0] = self.n - 1
-		#self.scores[1:] = np.arange(self.n)[:-1]
-		#self.scores = np.arange(self.n)[::-1]
 
 		orders = self.scores.argsort()
 		self.ranks = orders.argsort()
@@ -139,11 +132,7 @@ class RunningRankEnv(gym.Env):
 			# Past candidates that are equal should not decrease the weight since they are now "inaccessible"
 			self.running_ranks[i] = np.sum(self.scores[:i] > self.scores[i])
 
-		#print(self.running_ranks)
-
-		#self.running_ranks = (np.arange(self.n) + 1 - self.running_ranks) / (np.arange(self.n) + 1)
 		self.running_ranks = (self.n - self.running_ranks) / self.n
-		#print(self.running_ranks)
 
 		self.candidate_idx = 0
 		self.terminated = False
@@ -163,7 +152,7 @@ class RunningRankEnv(gym.Env):
 
 			raise ValueError(f'action must be {REJECT} or {COMMIT}')
 
-		if action == 0:
+		if action == REJECT:
 
 			if self.candidate_idx < self.n - 1:
 
@@ -186,8 +175,7 @@ class RunningRankEnv(gym.Env):
 			# reward is inverse to the "number of candidates better than this candidate"
 			# when there are no candidates that are better, the reward is maximal
 			# 0.1 is added to make 10 rather than infinity the max reward
-			reward = 1 / (self.n - (self.ranks[self.candidate_idx] + 1) + 0.1)# - 0.1
-			# reward = 1.0 if (self.ranks[self.candidate_idx] + 1) == self.n else 0.0
+			reward = 1 / (self.n - (self.ranks[self.candidate_idx] + 1) + 0.1)
 			terminated = True
 
 		self.terminated = terminated

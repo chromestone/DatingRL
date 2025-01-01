@@ -2,6 +2,9 @@
 test_env.py
 
 This script outputs states from an environment to allow a qualitative test.
+
+Usage:
+python3 test_env.py [real_score|running_rank]
 """
 
 from argparse import ArgumentParser

@@ -5,5 +5,5 @@ This module stores constants to be used by datingrl. Currently, this module prim
 standardizes the integer value of actions.
 """
 
-REJECT = 0
-COMMIT = 1
+REJECT: int = 0
+COMMIT: int = 1

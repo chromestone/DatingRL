@@ -6,7 +6,9 @@ train.py
 This script trains a deep reinforcement learning (DRL) agent on one of the DatingRL environments.
 
 Usage:
-TODO
+python3 train.py -a ppo -e running_rank --iters 10
+python3 train.py -a dqn -e running_rank --num_ckpts 4
+python3 train.py -a dqn -e running_rank --iters 200 --num_ckpts 8
 """
 
 from argparse import ArgumentParser
