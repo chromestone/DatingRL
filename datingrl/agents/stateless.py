@@ -87,7 +87,7 @@ class OptimalAgent:
 
 		return actions, probs
 
-class DRLAgent:
+class PPOAgent:
 	"""
 	A deep reinforcement learning agent.
 
@@ -99,7 +99,7 @@ class DRLAgent:
 
 	def __init__(self, checkpoint_path: str):
 		"""
-		Initializes an DRLAgent instance.
+		Initializes an PPOAgent instance.
 
 		Args:
 			checkpoint_path: The path to the RLlib saved checkpoint.
@@ -133,7 +133,52 @@ class DRLAgent:
 		# we'll have to sample an action or use the max-likelihood one).
 		return torch.argmax(action_logits, dim=1).numpy(), torch.softmax(action_logits, dim=1).numpy()[:, COMMIT]
 
+class DQNAgent:
+	"""
+	A deep reinforcement learning agent.
+
+	This agent loads the 'learner_group/learner/rl_module' RLlib RLModule from a checkpoint and
+	uses it to compute actions.
+
+	See the OptimalAgent class documentation for expected values in the observations.
+	"""
+
+	def __init__(self, checkpoint_path: str):
+		"""
+		Initializes an DQNAgent instance.
+
+		Args:
+			checkpoint_path: The path to the RLlib saved checkpoint.
+		"""
+
+		# Create only the neural network (RLModule) from our checkpoint.
+		self.torch_rl_module = RLModule.from_checkpoint(
+			(Path(checkpoint_path) / 'learner_group' / 'learner' / 'rl_module').resolve().as_uri()
+		)["default_policy"]
+
+	def compute_actions(self, observations: np.ndarray) -> tuple[np.ndarray, Optional[np.ndarray]]:
+		"""
+		Compute actions for a batch of observations.
+		See the class documentation above for expected values in the observations.
+
+		Args:
+			observations: A batch of observations of shape (batch, 2).
+
+		Returns:
+		    An array of actions of shape (batch, ) and probabilities of shape (batch, )
+		"""
+
+		# Compute the next action from a batch of observations.
+		torch_obs_batch = torch.from_numpy(observations)
+
+		actions = self.torch_rl_module.forward_inference({
+			'obs': torch_obs_batch
+		})['actions']
+
+		return actions.numpy(), None
+
 STR2AGENT = {
 	'optimal': OptimalAgent,
-	'drl': DRLAgent
+	'ppo': PPOAgent,
+	'dqn': DQNAgent
 }

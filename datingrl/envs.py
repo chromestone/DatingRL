@@ -186,7 +186,8 @@ class RunningRankEnv(gym.Env):
 			# reward is inverse to the "number of candidates better than this candidate"
 			# when there are no candidates that are better, the reward is maximal
 			# 0.1 is added to make 10 rather than infinity the max reward
-			reward = 1 / (self.n - (self.ranks[self.candidate_idx] + 1) + 0.01)
+			reward = 1 / (self.n - (self.ranks[self.candidate_idx] + 1) + 0.1)# - 0.1
+			# reward = 1.0 if (self.ranks[self.candidate_idx] + 1) == self.n else 0.0
 			terminated = True
 
 		self.terminated = terminated

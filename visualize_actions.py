@@ -2,14 +2,12 @@
 visualize_actions.py
 
 This script visualizes actions over the observation space.
-This script assumes that the agent is stateless and has been trained using "running rank" inputs.
 
 Usage:
 TODO
 """
 
 from argparse import ArgumentParser
-import os
 
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MultipleLocator
@@ -20,7 +18,25 @@ from datingrl.agents.stateless import STR2AGENT
 
 parser = ArgumentParser(description='Visualize actions over the observation space')
 
-parser.add_argument('agent', choices=STR2AGENT.keys(), help='Name of an agent in datingrl.agents.stateless (without any prefix)')
+parser.add_argument(
+	'-a',
+	'--agent',
+	choices=STR2AGENT.keys(),
+	required=True,
+	help='Name of an agent in datingrl.agents.stateless (without any prefix)'
+)
+parser.add_argument(
+	'-i',
+	'--input_type',
+	default='running_rank',
+	choices=['running_rank'],
+	help='Type of inputs the agent expects'
+)
+parser.add_argument(
+	'-c',
+	'--ckpt_path',
+	help='Path to checkpoint (if agent is trained)'
+)
 
 args = parser.parse_args()
 
@@ -69,24 +85,38 @@ def visualize_probs(matrix, agent_name):
 	plt.close()
 
 agent = None
-env_type = None
 agent_name = None
 
 if args.agent == 'optimal':
 
+	assert args.input_type == 'running_rank'
+
 	agent = STR2AGENT[args.agent](100)
-	env_type = 'running_rank'
 	agent_name = 'Optimal'
 
-elif args.agent == 'drl':
+elif args.agent == 'ppo':
 
-	agent = STR2AGENT[args.agent](os.path.join('checkpoints', 'running_rank_10'))
-	env_type = 'running_rank'
-	agent_name = 'DRL'
+	assert args.input_type == 'running_rank'
+	assert args.ckpt_path
 
-assert agent is not None and env_type is not None and agent_name is not None
+	agent = STR2AGENT[args.agent](args.ckpt_path)
+	agent_name = 'PPO'
 
-if env_type == 'running_rank':
+elif args.agent == 'dqn':
+
+	assert args.input_type == 'running_rank'
+	assert args.ckpt_path
+
+	agent = STR2AGENT[args.agent](args.ckpt_path)
+	agent_name = 'DQN'
+
+else:
+
+	raise NotImplementedError(f'Agent "{args.agent}" is not supported!')
+
+assert agent is not None and agent_name is not None
+
+if args.input_type == 'running_rank':
 
 	rows, cols = 100, 100
 	actions_matrix = np.zeros((rows, cols), dtype=np.float32)
@@ -120,5 +150,9 @@ if env_type == 'running_rank':
 	if probs_matrix is not None:
 
 		visualize_probs(probs_matrix, agent_name)
+
+else:
+
+	raise NotImplementedError(f'Input type "{args.input_type}" is not supported!')
 
 plt.close('all')
