@@ -89,6 +89,11 @@ class OptimalAgent:
 
 		return actions, probs
 
+	def compute_single_action(self, observation: tuple[float, float]) -> int:
+
+		actions, probs = self.compute_actions(np.array([observation], dtype=np.float32))
+		return actions[0]
+
 class PPOAgent:
 	"""
 	A deep reinforcement learning agent.

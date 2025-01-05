@@ -40,7 +40,8 @@ class RealScoreEnv(gym.Env):
 		self.scores = self.np_random.standard_normal(self.n, dtype=np.float32)
 
 		orders = self.scores.argsort()
-		self.ranks = orders.argsort()
+		# adding one makes ranks in [1, n]
+		self.ranks = orders.argsort() + 1
 
 		self.candidate_idx = 0
 		self.terminated = False
@@ -80,8 +81,8 @@ class RealScoreEnv(gym.Env):
 		else:
 
 			observation = np.array([0.0, self.scores[self.candidate_idx]], dtype=np.float32)
-			# +1 because we are 0 indexed and we give some > 0 reward for any candidate (even the worst)
-			reward = self.ranks[self.candidate_idx] + 1
+			# note that ranks is at least 1. we give some > 0 reward for any candidate (even the worst)
+			reward = self.ranks[self.candidate_idx]
 			terminated = True
 
 		self.terminated = terminated
@@ -121,7 +122,8 @@ class RunningRankEnv(gym.Env):
 		self.scores = self.np_random.standard_normal(self.n, dtype=np.float32)
 
 		orders = self.scores.argsort()
-		self.ranks = orders.argsort()
+		# adding one makes ranks in [1, n]
+		self.ranks = orders.argsort() + 1
 
 		self.running_ranks = np.zeros((self.n, ), dtype=np.float32)
 		# Iterate through the array to compute the running rank for each index
@@ -138,7 +140,10 @@ class RunningRankEnv(gym.Env):
 		self.terminated = False
 
 		observation = np.array([1.0, self.running_ranks[self.candidate_idx]], dtype=np.float32)
-		info = {}
+		info = {
+			'score': self.scores[self.candidate_idx],
+			'rank': self.ranks[self.candidate_idx]
+		}
 
 		return observation, info
 
@@ -161,6 +166,10 @@ class RunningRankEnv(gym.Env):
 				observation = np.array([(self.n - self.candidate_idx) / self.n, self.running_ranks[self.candidate_idx]], dtype=np.float32)
 				reward = 0.0
 				terminated = False
+				info = {
+					'score': self.scores[self.candidate_idx],
+					'rank': self.ranks[self.candidate_idx]
+				}
 
 			# we have rejected all candidates and will forever be single :(
 			else:
@@ -168,6 +177,10 @@ class RunningRankEnv(gym.Env):
 				observation = np.array([0.0, self.running_ranks[-1]], dtype=np.float32)
 				reward = -1.0
 				terminated = True
+				info = {
+					'score': None,
+					'rank': None
+				}
 
 		else:
 
@@ -175,13 +188,16 @@ class RunningRankEnv(gym.Env):
 			# reward is inverse to the "number of candidates better than this candidate"
 			# when there are no candidates that are better, the reward is maximal
 			# 0.1 is added to make 10 rather than infinity the max reward
-			reward = 1 / (self.n - (self.ranks[self.candidate_idx] + 1) + 0.1)
+			reward = 1 / (self.n - self.ranks[self.candidate_idx] + 0.1)
 			terminated = True
+			info = {
+				'score': self.scores[self.candidate_idx],
+				'rank': self.ranks[self.candidate_idx]
+			}
 
 		self.terminated = terminated
 
 		truncated = False
-		info = {}
 
 		return observation, float(reward), terminated, truncated, info
 

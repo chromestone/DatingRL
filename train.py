@@ -56,6 +56,12 @@ parser.add_argument(
 	type=int,
 	help='Number of evenly spaced checkpoints to save. Must divide iters'
 )
+parser.add_argument(
+	'--num_runners',
+	default=1,
+	type=int,
+	help='Number of environment runners. Sets RLlib num_env_runners'
+)
 
 args = parser.parse_args()
 
@@ -73,7 +79,7 @@ config = (
 		enable_env_runner_and_connector_v2=True,
 	)
 	.environment(env_class, env_config={})
-	.env_runners(num_env_runners=1)
+	.env_runners(num_env_runners=args.num_runners)
 )
 
 algo = config.build()
