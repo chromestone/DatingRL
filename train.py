@@ -62,6 +62,12 @@ parser.add_argument(
 	type=int,
 	help='Number of environment runners. Sets RLlib num_env_runners'
 )
+parser.add_argument(
+	'--envs_per_runner',
+	default=1,
+	type=int,
+	help='Number of environments per runners. Sets RLlib num_envs_per_env_runner'
+)
 
 args = parser.parse_args()
 
@@ -79,7 +85,7 @@ config = (
 		enable_env_runner_and_connector_v2=True,
 	)
 	.environment(env_class, env_config={})
-	.env_runners(num_env_runners=args.num_runners)
+	.env_runners(num_env_runners=args.num_runners, num_envs_per_env_runner=args.envs_per_runner)
 )
 
 algo = config.build()

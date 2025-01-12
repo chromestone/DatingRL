@@ -10,15 +10,13 @@ undefined.
 
 import numpy as np
 
-from ..constants import REJECT, COMMIT
+from ..constants import REJECT, COMMIT, INVERSE_E
 
 class OptimalAgent:
 	"""
 	An agent that takes actions according to the optimal policy under classical secretary problem
 	assumptions.
 	"""
-
-	INVERSE_E = 1 / np.e
 
 	def __init__(self, n: int):
 
@@ -33,7 +31,7 @@ class OptimalAgent:
 		candidates_rejected = 1 - observation[0]
 		score = observation[1]
 
-		if candidates_rejected >= OptimalAgent.INVERSE_E:
+		if candidates_rejected >= INVERSE_E:
 
 			if score >= self.best_obs or candidates_rejected >= (self.n - 1) / self.n:
 

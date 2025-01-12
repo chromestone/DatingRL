@@ -17,7 +17,7 @@ from ray.rllib.core.rl_module import RLModule
 
 import torch
 
-from ..constants import REJECT, COMMIT
+from ..constants import REJECT, COMMIT, INVERSE_E
 
 ACTIONS_PROBS_TUPLE_TYPE = tuple[np.ndarray[np.float32], Optional[np.ndarray[np.float32]]]
 
@@ -39,8 +39,6 @@ class OptimalAgent:
 		applicant interviewed so far (or continuing to the last applicant
 		if this never occurs).
 	"""
-
-	INVERSE_E = 1 / np.e
 
 	def __init__(self, n: int):
 		"""
@@ -73,7 +71,7 @@ class OptimalAgent:
 		actions = np.empty((observations.shape[0], ))
 		probs = None
 
-		can_select = candidates_rejected >= OptimalAgent.INVERSE_E
+		can_select = candidates_rejected >= INVERSE_E
 
 		actions[can_select] = np.where(
 			# criteria for COMMIT
