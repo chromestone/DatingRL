@@ -99,13 +99,16 @@ class PPOAgent:
 	See the OptimalAgent class documentation for expected values in the observations.
 	"""
 
-	def __init__(self, checkpoint_path: str):
+	def __init__(self, n: int, checkpoint_path: str):
 		"""
 		Initializes an PPOAgent instance.
 
 		Args:
+			n: The number of candidates.
 			checkpoint_path: The path to the RLlib saved checkpoint.
 		"""
+
+		self.n = n
 
 		# Create only the neural network (RLModule) from our checkpoint.
 		self.torch_rl_module = RLModule.from_checkpoint(
@@ -145,13 +148,16 @@ class DQNAgent:
 	See the OptimalAgent class documentation for expected values in the observations.
 	"""
 
-	def __init__(self, checkpoint_path: str):
+	def __init__(self, n: int, checkpoint_path: str):
 		"""
 		Initializes an DQNAgent instance.
 
 		Args:
+			n: The number of candidates.
 			checkpoint_path: The path to the RLlib saved checkpoint.
 		"""
+
+		self.n = n
 
 		# Create only the neural network (RLModule) from our checkpoint.
 		self.torch_rl_module = RLModule.from_checkpoint(
@@ -170,14 +176,29 @@ class DQNAgent:
 		    An array of actions of shape (batch, ) and probabilities of shape (batch, )
 		"""
 
-		# Compute the next action from a batch of observations.
-		torch_obs_batch = torch.from_numpy(observations)
+		actions = np.empty((observations.shape[0], ))
 
-		actions = self.torch_rl_module.forward_inference({
-			'obs': torch_obs_batch
-		})['actions']
+		candidates_rejected = 1 - observations[:, 0]
+		# at the last candidate we are forced to COMMIT
+		forced_choice = candidates_rejected >= (self.n - 1) / self.n
 
-		return actions.numpy(), None
+		actions[forced_choice] = COMMIT
+
+		# the model will predict on everything else
+		np_obs_batch = observations[~forced_choice]
+		if np_obs_batch.shape[0] > 0:
+
+			# Compute the next action from a batch of observations.
+			torch_obs_batch = torch.from_numpy(np_obs_batch)
+
+			torch_actions = self.torch_rl_module.forward_inference({
+				'obs': torch_obs_batch
+			})['actions']
+
+			# assign actions back into their original positions
+			actions[~forced_choice] = torch_actions.numpy()
+
+		return actions, None
 
 STR2AGENT = {
 	'optimal': OptimalAgent,

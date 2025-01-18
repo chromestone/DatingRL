@@ -159,7 +159,14 @@ class RunningRankEnv(gym.Env):
 
 		if action == REJECT:
 
-			if self.candidate_idx < self.n - 1:
+			# we will assume that choosing the last candidate is better than staying single forever
+			if self.candidate_idx == self.n - 2:
+
+				# rejecting candidate n - 2 means we commit to candidate n - 1
+				self.candidate_idx = self.n - 1
+				action = COMMIT
+
+			else:
 
 				self.candidate_idx += 1
 
@@ -171,18 +178,7 @@ class RunningRankEnv(gym.Env):
 					'rank': self.ranks[self.candidate_idx]
 				}
 
-			# we have rejected all candidates and will forever be single :(
-			else:
-
-				observation = np.array([0.0, 0.0], dtype=np.float32)
-				reward = -1.0
-				terminated = True
-				info = {
-					'score': None,
-					'rank': None
-				}
-
-		else:
+		if action == COMMIT:
 
 			observation = np.array([0.0, 0.0], dtype=np.float32)
 			# reward is inverse to the "number of candidates better than this candidate"

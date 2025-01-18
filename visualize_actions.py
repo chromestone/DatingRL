@@ -101,7 +101,7 @@ elif args.agent == 'ppo':
 	assert args.input_type == 'running_rank'
 	assert args.ckpt_path
 
-	agent = STR2AGENT[args.agent](args.ckpt_path)
+	agent = STR2AGENT[args.agent](100, args.ckpt_path)
 	agent_name = 'PPO'
 
 elif args.agent == 'dqn':
@@ -109,7 +109,7 @@ elif args.agent == 'dqn':
 	assert args.input_type == 'running_rank'
 	assert args.ckpt_path
 
-	agent = STR2AGENT[args.agent](args.ckpt_path)
+	agent = STR2AGENT[args.agent](100, args.ckpt_path)
 	agent_name = 'DQN'
 
 else:
