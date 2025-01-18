@@ -79,7 +79,7 @@ with open(args.output_file, 'w', encoding='utf-8', newline='') as fp:
 		while not terminated:
 
 			prev_observation = observation
-			action = agent.compute_single_action(observation)
+			action, _ = agent.compute_single_action(observation)
 			observation, reward, terminated, _, info = env.step(action)
 
 		info['index'] = prev_observation[0]

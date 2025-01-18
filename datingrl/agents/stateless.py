@@ -9,8 +9,6 @@ and always return the same action for the same observation.
 
 from pathlib import Path
 
-from typing import Optional
-
 import numpy as np
 
 from ray.rllib.core.rl_module import RLModule
@@ -19,7 +17,7 @@ import torch
 
 from ..constants import REJECT, COMMIT, INVERSE_E
 
-ACTIONS_PROBS_TUPLE_TYPE = tuple[np.ndarray[np.float32], Optional[np.ndarray[np.float32]]]
+from .. import types
 
 class OptimalAgent:
 	"""
@@ -50,7 +48,7 @@ class OptimalAgent:
 
 		self.n = n
 
-	def compute_actions(self, observations: np.ndarray[np.float32]) -> ACTIONS_PROBS_TUPLE_TYPE:
+	def compute_actions(self, observations: np.ndarray[np.float32]) -> types.ACTIONS_PROBS_TUPLE:
 		"""
 		Compute actions for a batch of observations.
 		See the class documentation above for expected values in the observations.
@@ -69,7 +67,6 @@ class OptimalAgent:
 		running_rank = observations[:, 1]
 
 		actions = np.empty((observations.shape[0], ))
-		probs = None
 
 		can_select = candidates_rejected >= INVERSE_E
 
@@ -85,12 +82,12 @@ class OptimalAgent:
 		)
 		actions[~can_select] = REJECT
 
-		return actions, probs
+		return actions, None
 
-	def compute_single_action(self, observation: tuple[float, float]) -> int:
+	def compute_single_action(self, observation: tuple[float, float]) -> types.INT_FLOAT_TUPLE:
 
-		actions, probs = self.compute_actions(np.array([observation], dtype=np.float32))
-		return actions[0]
+		actions, _ = self.compute_actions(np.array([observation], dtype=np.float32))
+		return actions[0], None
 
 class PPOAgent:
 	"""
@@ -115,7 +112,7 @@ class PPOAgent:
 			(Path(checkpoint_path) / 'learner_group' / 'learner' / 'rl_module').resolve().as_uri()
 		)["default_policy"]
 
-	def compute_actions(self, observations: np.ndarray[np.float32]) -> ACTIONS_PROBS_TUPLE_TYPE:
+	def compute_actions(self, observations: np.ndarray[np.float32]) -> types.ACTIONS_PROBS_TUPLE:
 		"""
 		Compute actions for a batch of observations.
 		See the class documentation above for expected values in the observations.
@@ -161,7 +158,7 @@ class DQNAgent:
 			(Path(checkpoint_path) / 'learner_group' / 'learner' / 'rl_module').resolve().as_uri()
 		)["default_policy"]
 
-	def compute_actions(self, observations: np.ndarray[np.float32]) -> ACTIONS_PROBS_TUPLE_TYPE:
+	def compute_actions(self, observations: np.ndarray[np.float32]) -> types.ACTIONS_PROBS_TUPLE:
 		"""
 		Compute actions for a batch of observations.
 		See the class documentation above for expected values in the observations.

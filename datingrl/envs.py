@@ -174,7 +174,7 @@ class RunningRankEnv(gym.Env):
 			# we have rejected all candidates and will forever be single :(
 			else:
 
-				observation = np.array([0.0, self.running_ranks[-1]], dtype=np.float32)
+				observation = np.array([0.0, 0.0], dtype=np.float32)
 				reward = -1.0
 				terminated = True
 				info = {
@@ -184,7 +184,7 @@ class RunningRankEnv(gym.Env):
 
 		else:
 
-			observation = np.array([0.0, self.running_ranks[self.candidate_idx]], dtype=np.float32)
+			observation = np.array([0.0, 0.0], dtype=np.float32)
 			# reward is inverse to the "number of candidates better than this candidate"
 			# when there are no candidates that are better, the reward is maximal
 			# 0.1 is added to make 10 rather than infinity the max reward

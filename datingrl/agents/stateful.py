@@ -12,6 +12,8 @@ import numpy as np
 
 from ..constants import REJECT, COMMIT, INVERSE_E
 
+from .. import types
+
 class OptimalAgent:
 	"""
 	An agent that takes actions according to the optimal policy under classical secretary problem
@@ -23,7 +25,7 @@ class OptimalAgent:
 		self.n = n
 		self.best_obs = None
 
-	def compute_single_action(self, observation: tuple[float, float]) -> int:
+	def compute_single_action(self, observation: tuple[float, float]) -> types.INT_FLOAT_TUPLE:
 
 		# This is the proportion of candidates that have been rejected.
 		# In the past, I have called this "candidates_seen".
@@ -33,15 +35,17 @@ class OptimalAgent:
 
 		if candidates_rejected >= INVERSE_E:
 
+			assert self.best_obs is not None
+
 			if score >= self.best_obs or candidates_rejected >= (self.n - 1) / self.n:
 
-				return COMMIT
+				return COMMIT, None
 
 		elif self.best_obs is None or score > self.best_obs:
 
 			self.best_obs = score
 
-		return REJECT
+		return REJECT, None
 
 STR2AGENT = {
 	'optimal': OptimalAgent
