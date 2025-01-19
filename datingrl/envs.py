@@ -9,7 +9,7 @@ from typing import Any, Optional
 import gymnasium as gym
 import numpy as np
 
-from .constants import REJECT, COMMIT
+from .constants import REJECT, COMMIT, DEFAULT_NUM_CANDIDATES
 
 class RealScoreEnv(gym.Env):
 	"""
@@ -21,7 +21,7 @@ class RealScoreEnv(gym.Env):
 		TODO
 		"""
 
-		self.n = env_config.get('n', 1000)
+		self.n = env_config.get('n', DEFAULT_NUM_CANDIDATES)
 
 		self.observation_space = gym.spaces.Box(
 			low=  np.array([0.0, -np.inf], dtype=np.float32),
@@ -103,7 +103,7 @@ class RunningRankEnv(gym.Env):
 		TODO
 		"""
 
-		self.n = env_config.get('n', 1000)
+		self.n = env_config.get('n', DEFAULT_NUM_CANDIDATES)
 
 		self.observation_space = gym.spaces.Box(
 			low=  np.array([0.0, 0.0], dtype=np.float32),

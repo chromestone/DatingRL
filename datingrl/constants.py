@@ -11,3 +11,5 @@ REJECT: int = 0
 COMMIT: int = 1
 
 INVERSE_E: float = 1 / np.e
+
+DEFAULT_NUM_CANDIDATES: int = 100
