@@ -17,7 +17,7 @@ import torch
 
 from ..constants import REJECT, COMMIT, INVERSE_E
 
-from .. import types
+from ..types import ACTIONS_PROBS_TUPLE, INT_FLOAT_TUPLE
 
 class OptimalAgent:
 	"""
@@ -48,7 +48,7 @@ class OptimalAgent:
 
 		self.n = n
 
-	def compute_actions(self, observations: np.ndarray[np.float32]) -> types.ACTIONS_PROBS_TUPLE:
+	def compute_actions(self, observations: np.ndarray[np.float32]) -> ACTIONS_PROBS_TUPLE:
 		"""
 		Compute actions for a batch of observations.
 		See the class documentation above for expected values in the observations.
@@ -57,7 +57,7 @@ class OptimalAgent:
 			observations: A batch of observations of shape (batch, 2).
 
 		Returns:
-		    An array of actions of shape (batch, ) and probabilities (None in this case)
+			An array of actions of shape (batch, ) and probabilities (None in this case)
 		"""
 
 		# This is the proportion of candidates that have been rejected.
@@ -66,7 +66,7 @@ class OptimalAgent:
 		candidates_rejected = 1 - observations[:, 0]
 		running_rank = observations[:, 1]
 
-		actions = np.empty((observations.shape[0], ))
+		actions = np.empty((observations.shape[0], ), dtype=np.float32)
 
 		can_select = candidates_rejected >= INVERSE_E
 
@@ -84,7 +84,17 @@ class OptimalAgent:
 
 		return actions, None
 
-	def compute_single_action(self, observation: tuple[float, float]) -> types.INT_FLOAT_TUPLE:
+	def compute_single_action(self, observation: tuple[float, float]) -> INT_FLOAT_TUPLE:
+		"""
+		Compute a single action on a single observation.
+		See the class documentation above for expected values in the observation.
+
+		Args:
+			observation: A single observation tuple.
+
+		Returns:
+			A tuple of an action and its corresponding probability (None in this case)
+		"""
 
 		actions, _ = self.compute_actions(np.array([observation], dtype=np.float32))
 		return actions[0], None
@@ -115,7 +125,7 @@ class PPOAgent:
 			(Path(checkpoint_path) / 'learner_group' / 'learner' / 'rl_module').resolve().as_uri()
 		)["default_policy"]
 
-	def compute_actions(self, observations: np.ndarray[np.float32]) -> types.ACTIONS_PROBS_TUPLE:
+	def compute_actions(self, observations: np.ndarray[np.float32]) -> ACTIONS_PROBS_TUPLE:
 		"""
 		Compute actions for a batch of observations.
 		See the class documentation above for expected values in the observations.
@@ -124,19 +134,54 @@ class PPOAgent:
 			observations: A batch of observations of shape (batch, 2).
 
 		Returns:
-		    An array of actions of shape (batch, ) and probabilities of shape (batch, )
+			An array of actions of shape (batch, ) and probabilities of shape (batch, )
 		"""
 
-		# Compute the next action from a batch of observations.
-		torch_obs_batch = torch.from_numpy(observations)
+		actions = np.empty((observations.shape[0], ), dtype=np.float32)
+		probs = np.empty((observations.shape[0], ), dtype=np.float32)
 
-		action_logits = self.torch_rl_module.forward_inference({
-			'obs': torch_obs_batch
-		})['action_dist_inputs']
+		candidates_rejected = 1 - observations[:, 0]
+		# at the last candidate we are forced to COMMIT
+		forced_choice = candidates_rejected >= (self.n - 1) / self.n
 
-		# The default RLModule used here produces action logits (from which
-		# we'll have to sample an action or use the max-likelihood one).
-		return torch.argmax(action_logits, dim=1).numpy(), torch.softmax(action_logits, dim=1).numpy()[:, COMMIT]
+		actions[forced_choice] = COMMIT
+		# we assume that choosing the last candidate is better than being alone forever
+		# thus we can confidently set the probability to 1 here
+		probs[forced_choice] = 1.0
+
+		# the model will predict on everything else
+		np_obs_batch = observations[~forced_choice]
+		if np_obs_batch.shape[0] > 0:
+
+			# Compute the next action from a batch of observations.
+			torch_obs_batch = torch.from_numpy(np_obs_batch)
+
+			action_logits = self.torch_rl_module.forward_inference({
+				'obs': torch_obs_batch
+			})['action_dist_inputs']
+
+			# assign actions and probs back into their original positions
+			# The default RLModule used here produces action logits (from which
+			# we'll have to sample an action or use the max-likelihood one).
+			actions[~forced_choice] = torch.argmax(action_logits, dim=1).numpy()
+			probs[~forced_choice] = torch.softmax(action_logits, dim=1).numpy()[:, COMMIT]
+
+		return actions, probs
+
+	def compute_single_action(self, observation: tuple[float, float]) -> INT_FLOAT_TUPLE:
+		"""
+		Compute a single action on a single observation.
+		See the class documentation above for expected values in the observation.
+
+		Args:
+			observation: A single observation tuple.
+
+		Returns:
+			A tuple of an action and its corresponding probability
+		"""
+
+		actions, probs = self.compute_actions(np.array([observation], dtype=np.float32))
+		return actions[0], probs[0]
 
 class DQNAgent:
 	"""
@@ -164,7 +209,7 @@ class DQNAgent:
 			(Path(checkpoint_path) / 'learner_group' / 'learner' / 'rl_module').resolve().as_uri()
 		)["default_policy"]
 
-	def compute_actions(self, observations: np.ndarray[np.float32]) -> types.ACTIONS_PROBS_TUPLE:
+	def compute_actions(self, observations: np.ndarray[np.float32]) -> ACTIONS_PROBS_TUPLE:
 		"""
 		Compute actions for a batch of observations.
 		See the class documentation above for expected values in the observations.
@@ -173,10 +218,10 @@ class DQNAgent:
 			observations: A batch of observations of shape (batch, 2).
 
 		Returns:
-		    An array of actions of shape (batch, ) and probabilities of shape (batch, )
+			An array of actions of shape (batch, ) and probabilities (None in this case)
 		"""
 
-		actions = np.empty((observations.shape[0], ))
+		actions = np.empty((observations.shape[0], ), dtype=np.float32)
 
 		candidates_rejected = 1 - observations[:, 0]
 		# at the last candidate we are forced to COMMIT
@@ -199,6 +244,21 @@ class DQNAgent:
 			actions[~forced_choice] = torch_actions.numpy()
 
 		return actions, None
+
+	def compute_single_action(self, observation: tuple[float, float]) -> INT_FLOAT_TUPLE:
+		"""
+		Compute a single action on a single observation.
+		See the class documentation above for expected values in the observation.
+
+		Args:
+			observation: A single observation tuple.
+
+		Returns:
+			A tuple of an action and its corresponding probability (None in this case)
+		"""
+
+		actions, _ = self.compute_actions(np.array([observation], dtype=np.float32))
+		return actions[0], None
 
 STR2AGENT = {
 	'optimal': OptimalAgent,
