@@ -111,7 +111,7 @@ class PPOAgent:
 
 	def __init__(self, n: int, checkpoint_path: str):
 		"""
-		Initializes an PPOAgent instance.
+		Initializes a PPOAgent instance.
 
 		Args:
 			n: The number of candidates.
@@ -195,7 +195,7 @@ class DQNAgent:
 
 	def __init__(self, n: int, checkpoint_path: str):
 		"""
-		Initializes an DQNAgent instance.
+		Initializes a DQNAgent instance.
 
 		Args:
 			n: The number of candidates.

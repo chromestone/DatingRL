@@ -1,7 +1,7 @@
 """
 env.py
 
-This module contains our custom Gymnasium environments.
+This module contains the datingrl Gymnasium environments.
 """
 
 from typing import Any, Optional
@@ -13,12 +13,19 @@ from .constants import REJECT, COMMIT, DEFAULT_NUM_CANDIDATES
 
 class RealScoreEnv(gym.Env):
 	"""
-	This environment only outputs the index with the z-score as the observation.
+	This environment outputs a candidate index with their score for each observation.
+	The index is normalized within (0, 1] to represent the proportion of candidates remaining.
+	The score is drawn from the standard normal distribution. This score is directly provided with
+	no other information apart from the index.
 	"""
 
 	def __init__(self, env_config: dict[str, Any]):
 		"""
-		TODO
+		Initializes a RealScoreEnv instance.
+
+		Args:
+			env_config: The environment config. The key 'n' sets the number of candidates. Defaults
+				to DEFAULT_NUM_CANDIDATES otherwise.
 		"""
 
 		self.n = env_config.get('n', DEFAULT_NUM_CANDIDATES)
@@ -94,13 +101,19 @@ class RealScoreEnv(gym.Env):
 
 class RunningRankEnv(gym.Env):
 	"""
-	This environment outputs the index with running rank as the observation.
-	The running rank is computed by comparing the ith score with scores from 0 to i-1.
+	This environment outputs a candidate index with their running rank for each observation.
+	The index is normalized within (0, 1] to represent the proportion of candidates remaining.
+	The running rank is computed by comparing the ith score with scores from 0 to i-1 and
+	is normalized by dividing by the total number of candidates.
 	"""
 
 	def __init__(self, env_config: dict[str, Any]):
 		"""
-		TODO
+		Initializes a RunningRankEnv instance.
+
+		Args:
+			env_config: The environment config. The key 'n' sets the number of candidates. Defaults
+				to DEFAULT_NUM_CANDIDATES otherwise.
 		"""
 
 		self.n = env_config.get('n', DEFAULT_NUM_CANDIDATES)

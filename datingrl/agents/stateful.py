@@ -12,20 +12,48 @@ import numpy as np
 
 from ..constants import REJECT, COMMIT, INVERSE_E
 
-from .. import types
+from ..types import INT_FLOAT_TUPLE
 
 class OptimalAgent:
 	"""
 	An agent that takes actions according to the optimal policy under classical secretary problem
 	assumptions.
+
+	This agent expects the observation space to be of 2 values.
+	The first value is the proportion of candidates remaining. The first value is within (0, 1].
+	The second value is some number representing the score of candidates. This implementation
+	assumes that a larger score implies a more favorable candidate.
+
+	According to Wikipedia:
+		The optimal stopping rule prescribes always rejecting the first
+		~ n / e {\\displaystyle \\sim n/e} applicants that are interviewed
+		and then stopping at the first applicant who is better than every
+		applicant interviewed so far (or continuing to the last applicant
+		if this never occurs).
 	"""
 
 	def __init__(self, n: int):
+		"""
+		Initializes an OptimalAgent instance.
+
+		Args:
+			n: The number of candidates.
+		"""
 
 		self.n = n
 		self.best_obs = None
 
-	def compute_single_action(self, observation: tuple[float, float]) -> types.INT_FLOAT_TUPLE:
+	def compute_single_action(self, observation: tuple[float, float]) -> INT_FLOAT_TUPLE:
+		"""
+		Compute actions for a batch of observations.
+		See the class documentation above for expected values in the observations.
+
+		Args:
+			observations: A batch of observations of shape (batch, 2).
+
+		Returns:
+			An array of actions of shape (batch, ) and probabilities (None in this case)
+		"""
 
 		# This is the proportion of candidates that have been rejected.
 		# In the past, I have called this "candidates_seen".
@@ -35,7 +63,11 @@ class OptimalAgent:
 
 		if candidates_rejected >= INVERSE_E:
 
-			assert self.best_obs is not None
+			if self.best_obs is None:
+
+				raise RuntimeError(
+					f'compute_single_action received candidates remaining {observation[0]} before the best observation could be set!'
+				)
 
 			if score >= self.best_obs or candidates_rejected >= (self.n - 1) / self.n:
 
